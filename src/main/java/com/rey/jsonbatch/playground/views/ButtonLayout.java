@@ -16,6 +16,8 @@ public class ButtonLayout extends VerticalLayout {
     private Button removeButton;
 
     public ButtonLayout(boolean showEdit) {
+        setPadding(false);
+
         upButton = new Button(new Icon(VaadinIcon.ARROW_UP));
         downButton = new Button(new Icon(VaadinIcon.ARROW_DOWN));
         addButton = new Button(new Icon(VaadinIcon.PLUS));

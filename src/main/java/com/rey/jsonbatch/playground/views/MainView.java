@@ -1,19 +1,22 @@
 package com.rey.jsonbatch.playground.views;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rey.jsonbatch.playground.SampleData;
 import com.rey.jsonbatch.playground.config.BatchConfiguration;
 import com.rey.jsonbatch.playground.model.ExtendedBatchTemplate;
 import com.rey.jsonbatch.playground.model.ExtendedRequestTemplate;
 import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.Push;
@@ -50,27 +53,28 @@ public class MainView extends VerticalLayout implements TemplateChangeListener {
     public MainView() {
         setSizeFull();
 
-        HorizontalLayout titleLayout = new HorizontalLayout();
-        titleLayout.setSizeUndefined();
-        titleLayout.setPadding(false);
-
-        add(titleLayout);
         H3 title = new H3("JsonBatch Playground");
-        titleLayout.add(title);
+        title.getStyle().set("margin-bottom", "0px");
+        title.getStyle().set("margin-top", "0.5em");
+        add(title);
 
-        Button sampleButton = new Button("Choose sample template");
+        HorizontalLayout menuLayout = new HorizontalLayout();
+        menuLayout.setPadding(false);
+        menuLayout.setWidthFull();
+        menuLayout.setSizeUndefined();
+        add(menuLayout);
+
+        Button sampleButton = new Button("Choose template");
         sampleButton.addClickListener(this::onSampleChoosingClicked);
-        titleLayout.add(sampleButton);
-        titleLayout.setVerticalComponentAlignment(Alignment.END, sampleButton);
-
-        Button exportButton = new Button("Export/Import template");
+        Button exportButton = new Button("Export/Import");
         exportButton.addClickListener(this::onExportChoosingClicked);
-        titleLayout.add(exportButton);
-        titleLayout.setVerticalComponentAlignment(Alignment.END, exportButton);
+        menuLayout.add(sampleButton, exportButton,
+                new Anchor("https://github.com/rey5137/jsonbatch", new Button("View JsonBatch")),
+                new Anchor("https://github.com/rey5137/jsonbatch-playground", new Button("View source")));
 
         HorizontalLayout mainLayout = new HorizontalLayout();
         mainLayout.setSizeFull();
-        mainLayout.setSpacing(false);
+        mainLayout.setPadding(false);
         add(mainLayout);
 
         requestGrid = new TreeGrid<>();
@@ -235,7 +239,7 @@ public class MainView extends VerticalLayout implements TemplateChangeListener {
 
         final TextArea textArea = new TextArea();
         textArea.setWidthFull();
-        textArea.setHeight("80%");
+        textArea.setHeight("85%");
         textArea.setLabel("Batch template");
         verticalLayout.add(textArea);
 
@@ -247,7 +251,7 @@ public class MainView extends VerticalLayout implements TemplateChangeListener {
 
         HorizontalLayout horizontalLayout = new HorizontalLayout();
         horizontalLayout.setWidthFull();
-        horizontalLayout.setHeight("20%");
+        horizontalLayout.setHeight("15%");
         horizontalLayout.setJustifyContentMode(JustifyContentMode.END);
         verticalLayout.add(horizontalLayout);
 

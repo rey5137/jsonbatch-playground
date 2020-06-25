@@ -31,7 +31,6 @@ public class ResponseListLayout extends HorizontalLayout {
 
     public ResponseListLayout() {
         setSizeFull();
-        setSpacing(false);
         setPadding(false);
 
         responseGrid = new Grid<>();
