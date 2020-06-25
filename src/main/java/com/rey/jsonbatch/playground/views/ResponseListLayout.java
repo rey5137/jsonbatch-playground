@@ -136,9 +136,8 @@ public class ResponseListLayout extends HorizontalLayout {
         verticalLayout.add(responseDetailsLayout);
 
         HorizontalLayout horizontalLayout = new HorizontalLayout();
-        horizontalLayout.setAlignItems(Alignment.END);
         horizontalLayout.setWidthFull();
-        horizontalLayout.setSizeUndefined();
+        horizontalLayout.setJustifyContentMode(JustifyContentMode.END);
         verticalLayout.add(horizontalLayout);
 
         Button cancelButton = new Button("Cancel");

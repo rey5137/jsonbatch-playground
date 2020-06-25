@@ -4,11 +4,11 @@ import com.rey.jsonbatch.playground.SampleData;
 import com.rey.jsonbatch.playground.model.ExtendedBatchTemplate;
 import com.rey.jsonbatch.playground.model.ExtendedRequestTemplate;
 import com.vaadin.flow.component.AbstractField;
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickEvent;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -19,8 +19,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -34,10 +32,6 @@ import java.util.List;
 @Push
 public class MainView extends VerticalLayout implements TemplateChangeListener {
 
-    private UI ui;
-
-    private Logger logger = LoggerFactory.getLogger(MainView.class);
-
     TreeGrid<ExtendedRequestTemplate> requestGrid;
     ButtonLayout buttonLayout;
     TemplateLayout templateLayout;
@@ -45,8 +39,18 @@ public class MainView extends VerticalLayout implements TemplateChangeListener {
     public MainView() {
         setSizeFull();
 
+        HorizontalLayout titleLayout = new HorizontalLayout();
+        titleLayout.setSizeUndefined();
+        titleLayout.setPadding(false);
+
+        add(titleLayout);
         H3 title = new H3("JsonBatch Playground");
-        add(title);
+        titleLayout.add(title);
+
+        Button sampleButton = new Button("Choose sample template");
+        sampleButton.addClickListener(this::onSampleChoosingClicked);
+        titleLayout.add(sampleButton);
+        titleLayout.setVerticalComponentAlignment(Alignment.END, sampleButton);
 
         HorizontalLayout mainLayout = new HorizontalLayout();
         mainLayout.setSizeFull();
@@ -77,13 +81,7 @@ public class MainView extends VerticalLayout implements TemplateChangeListener {
         mainLayout.add(templateLayout);
 
         requestGrid.asSingleSelect().addValueChangeListener(this::onRequestChanged);
-
-        addRequest(SampleData.sample1(), null);
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        this.ui = attachEvent.getUI();
+        addRequest(new ExtendedBatchTemplate(), null);
     }
 
     @Override
@@ -171,4 +169,43 @@ public class MainView extends VerticalLayout implements TemplateChangeListener {
                 addRequest(child, requestTemplate));
     }
 
+    private void onSampleChoosingClicked(ClickEvent<Button> event) {
+        Dialog dialog = new Dialog();
+        dialog.setWidth("30%");
+
+        VerticalLayout verticalLayout = new VerticalLayout();
+        verticalLayout.setSizeFull();
+        verticalLayout.setPadding(false);
+        dialog.add(verticalLayout);
+
+        final ComboBox<String> sampleBox = new ComboBox<>();
+        sampleBox.setWidthFull();
+        sampleBox.setLabel("Batch template");
+        sampleBox.setItems(SampleData.SAMPLES.keySet());
+        sampleBox.setValue(SampleData.SAMPLES.keySet().iterator().next());
+        verticalLayout.add(sampleBox);
+
+        HorizontalLayout horizontalLayout = new HorizontalLayout();
+        horizontalLayout.setWidthFull();
+        horizontalLayout.setJustifyContentMode(JustifyContentMode.END);
+        verticalLayout.add(horizontalLayout);
+
+        Button cancelButton = new Button("Cancel");
+        Button chooseButton = new Button("Choose");
+        horizontalLayout.add(cancelButton, chooseButton);
+
+        cancelButton.addClickListener(e -> dialog.close());
+        chooseButton.addClickListener(e -> {
+            String value = sampleBox.getValue();
+            if(value != null && !value.isEmpty()) {
+                ExtendedBatchTemplate template = SampleData.load(SampleData.SAMPLES.get(value));
+                requestGrid.getTreeData().clear();
+                addRequest(template, null);
+                requestGrid.getDataProvider().refreshAll();
+                templateLayout.setRequestTemplate(null);
+            }
+            dialog.close();
+        });
+        dialog.open();
+    }
 }

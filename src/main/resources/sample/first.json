@@ -1,0 +1,65 @@
+{
+  "title": "Batch: Get & create new post",
+  "requests": [
+    {
+      "title": "Search post",
+      "http_method": "GET",
+      "url": "https://jsonplaceholder.typicode.com/posts",
+      "headers": {
+        "Accept": "str application/json, */*"
+      },
+      "body": null,
+      "requests": [
+        {
+          "title": "Get first post",
+          "http_method": "GET",
+          "url": "https://jsonplaceholder.typicode.com/posts/@{$.responses[0].body[0].id}@",
+          "headers": {
+            "Accept": "str application/json, */*"
+          },
+          "body": null,
+          "requests": [
+            {
+              "title": "Create new post",
+              "http_method": "POST",
+              "url": "https://jsonplaceholder.typicode.com/posts",
+              "headers": {
+                "Content-type": "str application/json; charset=UTF-8"
+              },
+              "body": {
+                "title": "str A new post",
+                "userId": "int $.responses[1].body.userId",
+                "body": "str $.responses[1].body.body"
+              },
+              "responses": [
+                {
+                  "predicate": "__cmp(\"@{$.responses[2].status}@ != 201\")",
+                  "status": "$.responses[2].status",
+                  "headers": null,
+                  "body": {
+                    "first_post": "obj $.responses[1].body",
+                    "new_post": "Error"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "responses": [
+    {
+      "status": "$.responses[2].status",
+      "headers": null,
+      "body": {
+        "first_post": "obj $.responses[1].body",
+        "new_post": "obj $.responses[2].body"
+      }
+    }
+  ],
+  "dispatch_options": {
+    "fail_back_as_string": true,
+    "ignore_parsing_error": true
+  }
+}
