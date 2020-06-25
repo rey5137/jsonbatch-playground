@@ -67,4 +67,8 @@ public class TemplateLayout extends VerticalLayout {
         }
     }
 
+    public ExtendedRequestTemplate getRequestTemplate() {
+        return requestTemplate;
+    }
+
 }

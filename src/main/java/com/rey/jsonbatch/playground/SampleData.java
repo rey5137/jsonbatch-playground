@@ -2,6 +2,7 @@ package com.rey.jsonbatch.playground;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rey.jsonbatch.playground.config.BatchConfiguration;
 import com.rey.jsonbatch.playground.model.ExtendedBatchTemplate;
 import com.rey.jsonbatch.playground.model.ExtendedRequestTemplate;
 
@@ -9,7 +10,9 @@ import java.util.ArrayList;
 
 public class SampleData {
 
-    public static ExtendedBatchTemplate sample1(ObjectMapper objectMapper) throws JsonProcessingException {
+    private static ObjectMapper objectMapper = BatchConfiguration.buildObjectMapper();
+
+    public static ExtendedBatchTemplate sample1() {
         String data = "{\n" +
                 "    \"requests\": [\n" +
                 "        {\n" +
@@ -72,26 +75,26 @@ public class SampleData {
                 "    }\n" +
                 "}";
 
-        return cleanData(objectMapper.readValue(data, ExtendedBatchTemplate.class));
+        try {
+            return (ExtendedBatchTemplate) cleanData(objectMapper.readValue(data, ExtendedBatchTemplate.class));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    private static ExtendedBatchTemplate cleanData(ExtendedBatchTemplate template) {
-        for(ExtendedRequestTemplate child : template.getRequests())
-            cleanData(child);
-        return template;
-    }
-
-    private static void cleanData(ExtendedRequestTemplate template) {
-        if(template.getRequests() == null)
+    private static ExtendedRequestTemplate cleanData(ExtendedRequestTemplate template) {
+        if (template.getRequests() == null)
             template.setRequests(new ArrayList<>());
-        if(template.getResponses() == null)
+        if (template.getResponses() == null)
             template.setResponses(new ArrayList<>());
-        if(template.getTransformers() == null)
+        if (template.getTransformers() == null)
             template.setTransformers(new ArrayList<>());
 
-        for(ExtendedRequestTemplate child : template.getRequests()) {
+        for (ExtendedRequestTemplate child : template.getRequests()) {
             cleanData(child);
             child.setParent(template);
         }
+
+        return template;
     }
 }

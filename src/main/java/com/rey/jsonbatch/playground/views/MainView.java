@@ -1,10 +1,12 @@
 package com.rey.jsonbatch.playground.views;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rey.jsonbatch.playground.SampleData;
 import com.rey.jsonbatch.playground.model.ExtendedBatchTemplate;
 import com.rey.jsonbatch.playground.model.ExtendedRequestTemplate;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -15,7 +17,8 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The main view is a top-level placeholder for other views.
@@ -27,12 +30,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Push
 public class MainView extends VerticalLayout implements TemplateChangeListener {
 
+    private UI ui;
+
+    private Logger logger = LoggerFactory.getLogger(MainView.class);
+
     TreeGrid<ExtendedRequestTemplate> requestGrid;
     ButtonLayout buttonLayout;
     TemplateLayout templateLayout;
 
-    @Autowired
-    public MainView(ObjectMapper objectMapper) {
+    public MainView() {
         setSizeFull();
 
         H3 title = new H3("JsonBatch Playground");
@@ -46,12 +52,13 @@ public class MainView extends VerticalLayout implements TemplateChangeListener {
         requestGrid = new TreeGrid<>();
         requestGrid.setHeightFull();
         requestGrid.setWidth("30%");
-        requestGrid.addHierarchyColumn(ExtendedRequestTemplate::getLabel).setHeader("Requests").setSortable(false);
-        populate(requestGrid, objectMapper);
+        requestGrid.addHierarchyColumn(template -> Integer.toString(System.identityHashCode(template), 34).toUpperCase()).setHeader("Id").setSortable(false);
+        requestGrid.addColumn(ExtendedRequestTemplate::getLabel).setHeader("Title").setSortable(false);
         mainLayout.add(requestGrid);
 
         buttonLayout = new ButtonLayout();
         buttonLayout.setSizeUndefined();
+        buttonLayout.addOnAddButtonClick(this::onRequestAddClicked);
         mainLayout.add(buttonLayout);
 
         templateLayout = new TemplateLayout(this);
@@ -59,6 +66,13 @@ public class MainView extends VerticalLayout implements TemplateChangeListener {
         mainLayout.add(templateLayout);
 
         requestGrid.asSingleSelect().addValueChangeListener(event -> templateLayout.setRequestTemplate(event.getValue()));
+
+        add(requestGrid, SampleData.sample1(), null);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        this.ui = attachEvent.getUI();
     }
 
     @Override
@@ -66,14 +80,16 @@ public class MainView extends VerticalLayout implements TemplateChangeListener {
         requestGrid.getDataProvider().refreshItem(requestTemplate);
     }
 
-    private void populate(TreeGrid<ExtendedRequestTemplate> requestGrid, ObjectMapper objectMapper) {
-        try {
-            ExtendedBatchTemplate extendedBatchTemplate = SampleData.sample1(objectMapper);
-            extendedBatchTemplate.getRequests().forEach(requestTemplate ->
-                    add(requestGrid, requestTemplate, null));
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
+    private void onRequestAddClicked(ClickEvent<Button> event) {
+        logger.info("asd {}", event);
+        ExtendedRequestTemplate currentTemplate = templateLayout.getRequestTemplate();
+        ExtendedRequestTemplate newTemplate = new ExtendedRequestTemplate();
+        newTemplate.setParent(currentTemplate);
+        requestGrid.getTreeData().addItem(currentTemplate, newTemplate);
+        if(currentTemplate == null)
+            requestGrid.getDataProvider().refreshAll();
+        else
+            requestGrid.getDataProvider().refreshItem(currentTemplate, true);
     }
 
     private void add(TreeGrid<ExtendedRequestTemplate> requestGrid, ExtendedRequestTemplate requestTemplate, ExtendedRequestTemplate parentTemplate) {

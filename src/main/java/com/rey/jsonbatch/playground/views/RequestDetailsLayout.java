@@ -3,6 +3,7 @@ package com.rey.jsonbatch.playground.views;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rey.jsonbatch.playground.config.BatchConfiguration;
+import com.rey.jsonbatch.playground.model.ExtendedBatchTemplate;
 import com.rey.jsonbatch.playground.model.ExtendedRequestTemplate;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -78,26 +79,42 @@ public class RequestDetailsLayout extends VerticalLayout {
     public void setRequestTemplate(ExtendedRequestTemplate requestTemplate) {
         this.requestTemplate = requestTemplate;
         if (this.requestTemplate != null) {
-            titleField.setValue(Optional.ofNullable(requestTemplate.getTitle()).orElse(""));
-            predicateField.setValue(Optional.ofNullable(requestTemplate.getPredicate()).orElse(""));
-            methodComboBox.setValue(Optional.ofNullable(requestTemplate.getHttpMethod()).orElse("").toUpperCase());
-            urlField.setValue(Optional.ofNullable(requestTemplate.getUrl()).orElse(""));
-            bodyField.setValue(Optional.ofNullable(requestTemplate.getBody()).map(body -> {
-                try {
-                    return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(body);
-                } catch (JsonProcessingException e) {
-                    e.printStackTrace();
-                    return "Error";
-                }
-            }).orElse(""));
+            if(this.requestTemplate instanceof ExtendedBatchTemplate) {
+                titleField.setValue(Optional.ofNullable(requestTemplate.getTitle()).orElse(""));
+                predicateField.setVisible(false);
+                methodComboBox.setVisible(false);
+                urlField.setVisible(false);
+                bodyField.setVisible(false);
+                Collections.addAll(registrations,
+                        titleField.addValueChangeListener(this::onTitleChanged)
+                );
+            }
+            else {
+                titleField.setValue(Optional.ofNullable(requestTemplate.getTitle()).orElse(""));
+                predicateField.setVisible(true);
+                methodComboBox.setVisible(true);
+                urlField.setVisible(true);
+                bodyField.setVisible(true);
+                predicateField.setValue(Optional.ofNullable(requestTemplate.getPredicate()).orElse(""));
+                methodComboBox.setValue(Optional.ofNullable(requestTemplate.getHttpMethod()).orElse("").toUpperCase());
+                urlField.setValue(Optional.ofNullable(requestTemplate.getUrl()).orElse(""));
+                bodyField.setValue(Optional.ofNullable(requestTemplate.getBody()).map(body -> {
+                    try {
+                        return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(body);
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
+                        return "Error";
+                    }
+                }).orElse(""));
 
-            Collections.addAll(registrations,
-                    titleField.addValueChangeListener(this::onTitleChanged),
-                    predicateField.addValueChangeListener(this::onPredicateChanged),
-                    methodComboBox.addValueChangeListener(this::onMethodChanged),
-                    urlField.addValueChangeListener(this::onUrlChanged),
-                    bodyField.addValueChangeListener(this::onBodyChanged)
-            );
+                Collections.addAll(registrations,
+                        titleField.addValueChangeListener(this::onTitleChanged),
+                        predicateField.addValueChangeListener(this::onPredicateChanged),
+                        methodComboBox.addValueChangeListener(this::onMethodChanged),
+                        urlField.addValueChangeListener(this::onUrlChanged),
+                        bodyField.addValueChangeListener(this::onBodyChanged)
+                );
+            }
         } else {
             registrations.forEach(Registration::remove);
             registrations.clear();
