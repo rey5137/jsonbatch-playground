@@ -1,8 +1,12 @@
 package com.rey.jsonbatch.playground.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.rey.jsonbatch.model.DispatchOptions;
 import com.rey.jsonbatch.model.LoopOptions;
 
+@JsonIgnoreProperties({"loop", "predicate", "httpMethod", "url", "headers", "body", "transformers"})
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ExtendedBatchTemplate extends ExtendedRequestTemplate {
 
     private DispatchOptions dispatchOptions;

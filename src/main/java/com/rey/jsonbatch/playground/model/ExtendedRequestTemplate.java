@@ -1,15 +1,19 @@
 package com.rey.jsonbatch.playground.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.rey.jsonbatch.model.LoopTemplate;
 import com.rey.jsonbatch.model.ResponseTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ExtendedRequestTemplate {
 
     private String title;
 
+    @JsonIgnore
     private ExtendedRequestTemplate parent;
 
     private String predicate;
@@ -22,12 +26,15 @@ public class ExtendedRequestTemplate {
 
     private Object body;
 
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<ExtendedRequestTemplate> requests = new ArrayList<>();
 
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<ResponseTemplate> responses = new ArrayList<>();
 
     private LoopTemplate loop;
 
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<ResponseTemplate> transformers = new ArrayList<>();
 
     public String getPredicate() {
@@ -110,6 +117,7 @@ public class ExtendedRequestTemplate {
         this.title = title;
     }
 
+    @JsonIgnore
     public String getLabel() {
         if(title != null && !title.isEmpty())
             return title;

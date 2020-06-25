@@ -1,6 +1,9 @@
 package com.rey.jsonbatch.playground.views;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rey.jsonbatch.playground.SampleData;
+import com.rey.jsonbatch.playground.config.BatchConfiguration;
 import com.rey.jsonbatch.playground.model.ExtendedBatchTemplate;
 import com.rey.jsonbatch.playground.model.ExtendedRequestTemplate;
 import com.vaadin.flow.component.AbstractField;
@@ -14,11 +17,14 @@ import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.Push;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -32,9 +38,14 @@ import java.util.List;
 @Push
 public class MainView extends VerticalLayout implements TemplateChangeListener {
 
+    private Logger logger = LoggerFactory.getLogger(MainView.class);
+
     TreeGrid<ExtendedRequestTemplate> requestGrid;
     ButtonLayout buttonLayout;
     TemplateLayout templateLayout;
+
+    private ObjectMapper objectMapper = BatchConfiguration.objectMapper();
+    private ExtendedBatchTemplate batchTemplate;
 
     public MainView() {
         setSizeFull();
@@ -51,6 +62,11 @@ public class MainView extends VerticalLayout implements TemplateChangeListener {
         sampleButton.addClickListener(this::onSampleChoosingClicked);
         titleLayout.add(sampleButton);
         titleLayout.setVerticalComponentAlignment(Alignment.END, sampleButton);
+
+        Button exportButton = new Button("Export/Import template");
+        exportButton.addClickListener(this::onExportChoosingClicked);
+        titleLayout.add(exportButton);
+        titleLayout.setVerticalComponentAlignment(Alignment.END, exportButton);
 
         HorizontalLayout mainLayout = new HorizontalLayout();
         mainLayout.setSizeFull();
@@ -81,7 +97,9 @@ public class MainView extends VerticalLayout implements TemplateChangeListener {
         mainLayout.add(templateLayout);
 
         requestGrid.asSingleSelect().addValueChangeListener(this::onRequestChanged);
-        addRequest(new ExtendedBatchTemplate(), null);
+        batchTemplate = new ExtendedBatchTemplate();
+        addRequest(batchTemplate, null);
+        requestGrid.select(batchTemplate);
     }
 
     @Override
@@ -198,14 +216,62 @@ public class MainView extends VerticalLayout implements TemplateChangeListener {
         chooseButton.addClickListener(e -> {
             String value = sampleBox.getValue();
             if(value != null && !value.isEmpty()) {
-                ExtendedBatchTemplate template = SampleData.load(SampleData.SAMPLES.get(value));
-                requestGrid.getTreeData().clear();
-                addRequest(template, null);
-                requestGrid.getDataProvider().refreshAll();
-                templateLayout.setRequestTemplate(null);
+                setBatchTemplate(SampleData.load(SampleData.SAMPLES.get(value)));
             }
             dialog.close();
         });
         dialog.open();
+    }
+
+    private void onExportChoosingClicked(ClickEvent<Button> event) {
+        Dialog dialog = new Dialog();
+        dialog.setWidth("80%");
+        dialog.setHeight("80%");
+
+        VerticalLayout verticalLayout = new VerticalLayout();
+        verticalLayout.setSizeFull();
+        verticalLayout.setPadding(false);
+        dialog.add(verticalLayout);
+
+        final TextArea textArea = new TextArea();
+        textArea.setWidthFull();
+        textArea.setHeight("80%");
+        textArea.setLabel("Batch template");
+        verticalLayout.add(textArea);
+
+        try {
+            textArea.setValue(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(batchTemplate));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        HorizontalLayout horizontalLayout = new HorizontalLayout();
+        horizontalLayout.setWidthFull();
+        horizontalLayout.setHeight("20%");
+        horizontalLayout.setJustifyContentMode(JustifyContentMode.END);
+        verticalLayout.add(horizontalLayout);
+
+        Button cancelButton = new Button("Cancel");
+        Button importButton = new Button("Import");
+        horizontalLayout.add(cancelButton, importButton);
+
+        cancelButton.addClickListener(e -> dialog.close());
+        importButton.addClickListener(e -> {
+            try {
+                setBatchTemplate(objectMapper.readValue(textArea.getValue(), ExtendedBatchTemplate.class));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            dialog.close();
+        });
+        dialog.open();
+    }
+
+    private void setBatchTemplate(ExtendedBatchTemplate batchTemplate) {
+        this.batchTemplate = batchTemplate;
+        requestGrid.getTreeData().clear();
+        addRequest(batchTemplate, null);
+        requestGrid.getDataProvider().refreshAll();
+        requestGrid.select(batchTemplate);
     }
 }
