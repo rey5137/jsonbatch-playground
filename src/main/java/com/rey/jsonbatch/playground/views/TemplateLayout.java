@@ -5,10 +5,14 @@ import com.rey.jsonbatch.playground.model.ExtendedRequestTemplate;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 
 public class TemplateLayout extends VerticalLayout {
+
+    private Logger logger = LoggerFactory.getLogger(TemplateLayout.class);
 
     VerticalLayout container;
 
@@ -68,7 +72,8 @@ public class TemplateLayout extends VerticalLayout {
 
     public void setRequestTemplate(ExtendedRequestTemplate requestTemplate) {
         this.requestTemplate = requestTemplate;
-        if(this.requestTemplate == null) {
+
+        if(requestTemplate == null) {
             container.setVisible(false);
             requestDetailsLayout.setRequestTemplate(null);
             responseListLayout.setResponseTemplates(Collections.emptyList());
@@ -80,7 +85,7 @@ public class TemplateLayout extends VerticalLayout {
                 testingLayout.setBatchTemplate((ExtendedBatchTemplate)requestTemplate);
             }
             else
-                testingLayout.setVisible(false);
+                testingTab.setVisible(false);
             container.setVisible(true);
             tabs.setSelectedTab(detailsTab);
             requestDetailsLayout.setRequestTemplate(requestTemplate);
