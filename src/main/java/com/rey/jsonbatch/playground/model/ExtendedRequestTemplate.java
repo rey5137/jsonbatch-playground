@@ -3,6 +3,7 @@ package com.rey.jsonbatch.playground.model;
 import com.rey.jsonbatch.model.LoopTemplate;
 import com.rey.jsonbatch.model.ResponseTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ExtendedRequestTemplate {
@@ -21,13 +22,13 @@ public class ExtendedRequestTemplate {
 
     private Object body;
 
-    private List<ExtendedRequestTemplate> requests;
+    private List<ExtendedRequestTemplate> requests = new ArrayList<>();
 
-    private List<ResponseTemplate> responses;
+    private List<ResponseTemplate> responses = new ArrayList<>();
 
     private LoopTemplate loop;
 
-    private List<ResponseTemplate> transformers;
+    private List<ResponseTemplate> transformers = new ArrayList<>();
 
     public String getPredicate() {
         return predicate;
@@ -126,4 +127,5 @@ public class ExtendedRequestTemplate {
     public void setParent(ExtendedRequestTemplate parent) {
         this.parent = parent;
     }
+
 }

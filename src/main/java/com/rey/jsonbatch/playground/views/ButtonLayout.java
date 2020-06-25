@@ -38,4 +38,20 @@ public class ButtonLayout extends VerticalLayout {
     public void addOnRemoveButtonClick(ComponentEventListener<ClickEvent<Button>> listener) {
         removeButton.addClickListener(listener);
     }
+
+    public void setUpButtonEnabled(Boolean enabled) {
+        upButton.setEnabled(enabled);
+    }
+
+    public void setDownButtonEnabled(Boolean enabled) {
+        downButton.setEnabled(enabled);
+    }
+
+    public void setAddButtonEnabled(Boolean enabled) {
+        addButton.setEnabled(enabled);
+    }
+
+    public void setRemoveButtonEnabled(Boolean enabled) {
+        removeButton.setEnabled(enabled);
+    }
 }

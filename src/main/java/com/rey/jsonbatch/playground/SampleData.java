@@ -6,8 +6,6 @@ import com.rey.jsonbatch.playground.config.BatchConfiguration;
 import com.rey.jsonbatch.playground.model.ExtendedBatchTemplate;
 import com.rey.jsonbatch.playground.model.ExtendedRequestTemplate;
 
-import java.util.ArrayList;
-
 public class SampleData {
 
     private static ObjectMapper objectMapper = BatchConfiguration.buildObjectMapper();
@@ -83,18 +81,10 @@ public class SampleData {
     }
 
     private static ExtendedRequestTemplate cleanData(ExtendedRequestTemplate template) {
-        if (template.getRequests() == null)
-            template.setRequests(new ArrayList<>());
-        if (template.getResponses() == null)
-            template.setResponses(new ArrayList<>());
-        if (template.getTransformers() == null)
-            template.setTransformers(new ArrayList<>());
-
         for (ExtendedRequestTemplate child : template.getRequests()) {
             cleanData(child);
             child.setParent(template);
         }
-
         return template;
     }
 }
