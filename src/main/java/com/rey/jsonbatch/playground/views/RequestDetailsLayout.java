@@ -25,6 +25,7 @@ public class RequestDetailsLayout extends VerticalLayout {
     TextField predicateField;
     ComboBox<String> methodComboBox;
     TextField urlField;
+    TextArea headersField;
     TextArea bodyField;
 
     private List<Registration> registrations = new ArrayList<>();
@@ -69,11 +70,24 @@ public class RequestDetailsLayout extends VerticalLayout {
         urlField.setValueChangeMode(ValueChangeMode.LAZY);
         urlLayout.add(urlField);
 
+        HorizontalLayout layout = new HorizontalLayout();
+        layout.setSizeFull();
+        layout.setMaxHeight("60%");
+        add(layout);
+
+        headersField = new TextArea();
+        headersField.setLabel("Headers");
+        headersField.setHeightFull();
+        headersField.setWidth("40%");
+        headersField.setValueChangeMode(ValueChangeMode.LAZY);
+        layout.add(headersField);
+
         bodyField = new TextArea();
         bodyField.setLabel("Body");
-        bodyField.setSizeFull();
+        bodyField.setHeightFull();
+        bodyField.setWidth("60%");
         bodyField.setValueChangeMode(ValueChangeMode.LAZY);
-        add(bodyField);
+        layout.add(bodyField);
     }
 
     public void setRequestTemplate(ExtendedRequestTemplate requestTemplate) {
@@ -84,6 +98,7 @@ public class RequestDetailsLayout extends VerticalLayout {
                 predicateField.setVisible(false);
                 methodComboBox.setVisible(false);
                 urlField.setVisible(false);
+                headersField.setVisible(false);
                 bodyField.setVisible(false);
                 Collections.addAll(registrations,
                         titleField.addValueChangeListener(this::onTitleChanged)
@@ -94,10 +109,19 @@ public class RequestDetailsLayout extends VerticalLayout {
                 predicateField.setVisible(true);
                 methodComboBox.setVisible(true);
                 urlField.setVisible(true);
+                headersField.setVisible(true);
                 bodyField.setVisible(true);
                 predicateField.setValue(Optional.ofNullable(requestTemplate.getPredicate()).orElse(""));
                 methodComboBox.setValue(Optional.ofNullable(requestTemplate.getHttpMethod()).orElse("").toUpperCase());
                 urlField.setValue(Optional.ofNullable(requestTemplate.getUrl()).orElse(""));
+                headersField.setValue(Optional.ofNullable(requestTemplate.getHeaders()).map(headers -> {
+                    try {
+                        return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(headers);
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
+                        return "Error";
+                    }
+                }).orElse(""));
                 bodyField.setValue(Optional.ofNullable(requestTemplate.getBody()).map(body -> {
                     try {
                         return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(body);
@@ -112,6 +136,7 @@ public class RequestDetailsLayout extends VerticalLayout {
                         predicateField.addValueChangeListener(this::onPredicateChanged),
                         methodComboBox.addValueChangeListener(this::onMethodChanged),
                         urlField.addValueChangeListener(this::onUrlChanged),
+                        headersField.addValueChangeListener(this::onHeadersChanged),
                         bodyField.addValueChangeListener(this::onBodyChanged)
                 );
             }
@@ -121,6 +146,7 @@ public class RequestDetailsLayout extends VerticalLayout {
             titleField.setValue("");
             predicateField.setValue("");
             urlField.setValue("");
+            headersField.setValue("");
             bodyField.setValue("");
         }
     }
@@ -143,6 +169,13 @@ public class RequestDetailsLayout extends VerticalLayout {
     private void onUrlChanged(AbstractField.ComponentValueChangeEvent<TextField, String> event) {
         requestTemplate.setUrl(event.getValue());
         templateChangeListener.onTemplateChanged(requestTemplate);
+    }
+
+    private void onHeadersChanged(AbstractField.ComponentValueChangeEvent<TextArea, String> event) {
+        try {
+            requestTemplate.setHeaders(objectMapper.readValue(event.getValue(), Object.class));
+            templateChangeListener.onTemplateChanged(requestTemplate);
+        } catch (JsonProcessingException e) {}
     }
 
     private void onBodyChanged(AbstractField.ComponentValueChangeEvent<TextArea, String> event) {

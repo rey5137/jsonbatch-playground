@@ -5,6 +5,9 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 public class TemplateLayout extends VerticalLayout {
 
     VerticalLayout container;
@@ -59,11 +62,13 @@ public class TemplateLayout extends VerticalLayout {
         if(this.requestTemplate == null) {
             container.setVisible(false);
             requestDetailsLayout.setRequestTemplate(null);
+            responseListLayout.setResponseTemplates(Collections.emptyList());
         }
         else {
             container.setVisible(true);
             tabs.setSelectedTab(detailsTab);
             requestDetailsLayout.setRequestTemplate(requestTemplate);
+            responseListLayout.setResponseTemplates(requestTemplate.getResponses());
         }
     }
 

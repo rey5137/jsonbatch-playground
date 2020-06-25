@@ -12,15 +12,20 @@ public class ButtonLayout extends VerticalLayout {
     private Button upButton;
     private Button downButton;
     private Button addButton;
+    private Button editButton;
     private Button removeButton;
 
-    public ButtonLayout() {
+    public ButtonLayout(boolean showEdit) {
         upButton = new Button(new Icon(VaadinIcon.ARROW_UP));
         downButton = new Button(new Icon(VaadinIcon.ARROW_DOWN));
         addButton = new Button(new Icon(VaadinIcon.PLUS));
         removeButton = new Button(new Icon(VaadinIcon.MINUS));
-
-        add(upButton, downButton, addButton, removeButton);
+        if(showEdit) {
+            editButton = new Button(new Icon(VaadinIcon.EDIT));
+            add(upButton, downButton, addButton, editButton, removeButton);
+        }
+        else
+            add(upButton, downButton, addButton, removeButton);
     }
 
     public void addOnUpButtonClick(ComponentEventListener<ClickEvent<Button>> listener) {
@@ -33,6 +38,10 @@ public class ButtonLayout extends VerticalLayout {
 
     public void addOnAddButtonClick(ComponentEventListener<ClickEvent<Button>> listener) {
         addButton.addClickListener(listener);
+    }
+
+    public void addOnEditButtonClick(ComponentEventListener<ClickEvent<Button>> listener) {
+        editButton.addClickListener(listener);
     }
 
     public void addOnRemoveButtonClick(ComponentEventListener<ClickEvent<Button>> listener) {
@@ -49,6 +58,10 @@ public class ButtonLayout extends VerticalLayout {
 
     public void setAddButtonEnabled(Boolean enabled) {
         addButton.setEnabled(enabled);
+    }
+
+    public void setEditButtonEnabled(Boolean enabled) {
+        editButton.setEnabled(enabled);
     }
 
     public void setRemoveButtonEnabled(Boolean enabled) {

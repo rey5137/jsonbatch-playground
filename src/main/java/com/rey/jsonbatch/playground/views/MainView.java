@@ -60,7 +60,7 @@ public class MainView extends VerticalLayout implements TemplateChangeListener {
         requestGrid.addColumn(ExtendedRequestTemplate::getLabel).setHeader("Title").setSortable(false);
         mainLayout.add(requestGrid);
 
-        buttonLayout = new ButtonLayout();
+        buttonLayout = new ButtonLayout(false);
         buttonLayout.setSizeUndefined();
         buttonLayout.addOnUpButtonClick(this::onRequestUpClicked);
         buttonLayout.addOnDownButtonClick(this::onRequestDownClicked);
