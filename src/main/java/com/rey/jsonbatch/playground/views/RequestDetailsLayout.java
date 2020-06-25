@@ -33,7 +33,7 @@ public class RequestDetailsLayout extends VerticalLayout {
     private ExtendedRequestTemplate requestTemplate;
     private TemplateChangeListener templateChangeListener;
 
-    private ObjectMapper objectMapper = BatchConfiguration.buildObjectMapper();
+    private ObjectMapper objectMapper = BatchConfiguration.objectMapper();
 
     public RequestDetailsLayout(TemplateChangeListener templateChangeListener) {
         this.templateChangeListener = templateChangeListener;

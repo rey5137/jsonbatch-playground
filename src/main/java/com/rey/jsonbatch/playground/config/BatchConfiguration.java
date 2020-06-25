@@ -14,30 +14,21 @@ import com.rey.jsonbatch.function.Function;
 import com.rey.jsonbatch.function.Functions;
 import com.rey.jsonbatch.function.GroovyFunction;
 import org.apache.http.impl.client.HttpClients;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-@Configuration
 public class BatchConfiguration {
 
-    @Bean
-    public ExecutorService executorService() {
-        return Executors.newCachedThreadPool();
+    public static ObjectMapper objectMapper() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+        return objectMapper;
     }
 
-    @Bean
-    public ObjectMapper objectMapper() {
-        return buildObjectMapper();
-    }
-
-    @Bean
-    public BatchEngine batchEngine(ObjectMapper objectMapper) {
+    public static BatchEngine batchEngine() {
+        ObjectMapper objectMapper = objectMapper();
         com.jayway.jsonpath.Configuration conf = com.jayway.jsonpath.Configuration.builder()
                 .options(Option.SUPPRESS_EXCEPTIONS)
                 .jsonProvider(new JacksonJsonProvider(objectMapper))
@@ -53,11 +44,4 @@ public class BatchConfiguration {
 
         return new BatchEngine(conf, jsonBuilder, requestDispatcher);
     }
-
-    public static ObjectMapper buildObjectMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
-        return objectMapper;
-    }
-
 }

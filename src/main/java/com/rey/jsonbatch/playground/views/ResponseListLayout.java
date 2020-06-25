@@ -11,7 +11,6 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.data.provider.DataProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +23,7 @@ public class ResponseListLayout extends HorizontalLayout {
     Grid<ResponseTemplate> responseGrid;
     ButtonLayout buttonLayout;
 
-    private ObjectMapper objectMapper = BatchConfiguration.buildObjectMapper();
+    private ObjectMapper objectMapper = BatchConfiguration.objectMapper();
 
     private List<ResponseTemplate> responseTemplates;
 

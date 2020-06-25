@@ -8,7 +8,7 @@ import com.rey.jsonbatch.playground.model.ExtendedRequestTemplate;
 
 public class SampleData {
 
-    private static ObjectMapper objectMapper = BatchConfiguration.buildObjectMapper();
+    private static ObjectMapper objectMapper = BatchConfiguration.objectMapper();
 
     public static ExtendedBatchTemplate sample1() {
         String data = "{\n" +

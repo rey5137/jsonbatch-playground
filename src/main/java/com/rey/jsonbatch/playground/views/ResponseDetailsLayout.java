@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rey.jsonbatch.model.ResponseTemplate;
 import com.rey.jsonbatch.playground.config.BatchConfiguration;
-import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -20,7 +19,7 @@ public class ResponseDetailsLayout extends VerticalLayout {
     TextArea headersField;
     TextArea bodyField;
 
-    private ObjectMapper objectMapper = BatchConfiguration.buildObjectMapper();
+    private ObjectMapper objectMapper = BatchConfiguration.objectMapper();
 
     public ResponseDetailsLayout(ResponseTemplate responseTemplate) {
         setSizeFull();

@@ -1,11 +1,11 @@
 package com.rey.jsonbatch.playground.views;
 
+import com.rey.jsonbatch.playground.model.ExtendedBatchTemplate;
 import com.rey.jsonbatch.playground.model.ExtendedRequestTemplate;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 
-import java.util.ArrayList;
 import java.util.Collections;
 
 public class TemplateLayout extends VerticalLayout {
@@ -16,9 +16,11 @@ public class TemplateLayout extends VerticalLayout {
 
     Tab detailsTab;
     Tab responsesTab;
+    Tab testingTab;
 
     RequestDetailsLayout requestDetailsLayout;
     ResponseListLayout responseListLayout;
+    TestingLayout testingLayout;
 
     private ExtendedRequestTemplate requestTemplate;
 
@@ -35,7 +37,8 @@ public class TemplateLayout extends VerticalLayout {
 
         detailsTab = new Tab("Details");
         responsesTab = new Tab("Responses");
-        tabs = new Tabs(detailsTab, responsesTab);
+        testingTab = new Tab("Testing");
+        tabs = new Tabs(detailsTab, responsesTab, testingTab);
         container.add(tabs);
 
         requestDetailsLayout = new RequestDetailsLayout(templateChangeListener);
@@ -48,6 +51,11 @@ public class TemplateLayout extends VerticalLayout {
         responseListLayout.setVisible(false);
         container.add(responseListLayout);
 
+        testingLayout = new TestingLayout();
+        testingLayout.setSizeFull();
+        testingLayout.setVisible(false);
+        container.add(testingLayout);
+
         tabs.addSelectedChangeListener(event -> onTabSelectedChanged(tabs.getSelectedTab()));
         container.setVisible(false);
     }
@@ -55,6 +63,7 @@ public class TemplateLayout extends VerticalLayout {
     private void onTabSelectedChanged(Tab selectedTab) {
         requestDetailsLayout.setVisible(selectedTab == detailsTab);
         responseListLayout.setVisible(selectedTab == responsesTab);
+        testingLayout.setVisible(selectedTab == testingTab);
     }
 
     public void setRequestTemplate(ExtendedRequestTemplate requestTemplate) {
@@ -63,8 +72,15 @@ public class TemplateLayout extends VerticalLayout {
             container.setVisible(false);
             requestDetailsLayout.setRequestTemplate(null);
             responseListLayout.setResponseTemplates(Collections.emptyList());
+            testingLayout.setBatchTemplate(null);
         }
         else {
+            if(requestTemplate instanceof ExtendedBatchTemplate) {
+                testingTab.setVisible(true);
+                testingLayout.setBatchTemplate((ExtendedBatchTemplate)requestTemplate);
+            }
+            else
+                testingLayout.setVisible(false);
             container.setVisible(true);
             tabs.setSelectedTab(detailsTab);
             requestDetailsLayout.setRequestTemplate(requestTemplate);
