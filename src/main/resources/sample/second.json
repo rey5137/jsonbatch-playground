@@ -1,0 +1,52 @@
+{
+  "title": "Batch: Search & group post by user",
+  "requests": [
+    {
+      "title": "Search users",
+      "http_method": "GET",
+      "url": "https://jsonplaceholder.typicode.com/users",
+      "headers": {
+        "Accept": "str application/json, */*"
+      },
+      "body": null,
+      "requests": [
+        {
+          "title": "Search posts",
+          "http_method": "GET",
+          "url": "https://jsonplaceholder.typicode.com/posts",
+          "headers": {
+            "Accept": "str application/json, */*"
+          },
+          "body": null
+        }
+      ]
+    }
+  ],
+  "responses": [
+    {
+      "status": 200,
+      "headers": null,
+      "body": [
+        {
+          "user_id": "$.id",
+          "name": "$.name",
+          "username": "$.username",
+          "email": "$.email",
+          "posts": [
+            {
+              "id": "$.id",
+              "title": "$.title",
+              "body": "$.body",
+              "__array_schema": "$$.responses[1].body[?(@.userId == @{$.id}@)]"
+            }
+          ],
+          "__array_schema": "$.responses[0].body"
+        }
+      ]
+    }
+  ],
+  "dispatch_options": {
+    "fail_back_as_string": true,
+    "ignore_parsing_error": true
+  }
+}

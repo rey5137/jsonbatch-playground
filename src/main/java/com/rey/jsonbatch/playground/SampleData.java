@@ -16,6 +16,7 @@ public class SampleData {
     static {
         SAMPLES = new LinkedHashMap<>();
         SAMPLES.put("Get & create post", "sample/first.json");
+        SAMPLES.put("Search & group post by user", "sample/second.json");
     }
 
     public static ExtendedBatchTemplate load(String path) {
