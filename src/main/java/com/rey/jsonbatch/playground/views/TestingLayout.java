@@ -75,14 +75,15 @@ public class TestingLayout extends HorizontalLayout {
         headersField = new TextArea();
         headersField.setLabel("Headers");
         headersField.setWidthFull();
-        headersField.setHeight("40%");
+        headersField.setMaxHeight("300px");
         originalLayout.add(headersField);
 
         bodyField = new TextArea();
         bodyField.setLabel("Body");
         bodyField.setWidthFull();
-        bodyField.setHeight("60%");
+        bodyField.setMaxHeight("300px");
         originalLayout.add(bodyField);
+        originalLayout.setFlexGrow(1f, headersField, bodyField);
 
         VerticalLayout responseLayout = new VerticalLayout();
         responseLayout.setHeightFull();
@@ -95,9 +96,12 @@ public class TestingLayout extends HorizontalLayout {
         responseLayout.add(runButton);
 
         responseField = new TextArea();
-        responseField.setSizeFull();
+        responseField.setWidthFull();
+        responseField.setMaxHeight("600px");
         responseField.setLabel("Response");
+        responseField.setReadOnly(true);
         responseLayout.add(responseField);
+        responseLayout.setFlexGrow(1f, responseField);
 
         runButton.addClickListener(this::onRunClicked);
     }
