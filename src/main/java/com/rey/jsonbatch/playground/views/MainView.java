@@ -6,9 +6,7 @@ import com.rey.jsonbatch.playground.config.BatchConfiguration;
 import com.rey.jsonbatch.playground.model.ExtendedBatchTemplate;
 import com.rey.jsonbatch.playground.model.ExtendedRequestTemplate;
 import com.vaadin.flow.component.AbstractField;
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickEvent;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -16,7 +14,6 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.Push;
@@ -29,6 +26,7 @@ import com.vaadin.flow.theme.lumo.Lumo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -52,6 +50,7 @@ public class MainView extends VerticalLayout implements TemplateChangeListener {
 
     public MainView() {
         setSizeFull();
+        getStyle().set("overflow-y", "auto");
 
         H3 title = new H3("JsonBatch Playground");
         title.getStyle().set("margin-bottom", "0px");
@@ -80,7 +79,10 @@ public class MainView extends VerticalLayout implements TemplateChangeListener {
         requestGrid = new TreeGrid<>();
         requestGrid.setHeightFull();
         requestGrid.setWidth("30%");
-        requestGrid.addHierarchyColumn(template -> Integer.toString(System.identityHashCode(template), 34).toUpperCase()).setHeader("Id").setSortable(false);
+        requestGrid.addHierarchyColumn(template -> Integer.toString(System.identityHashCode(template), 34).toUpperCase())
+                .setHeader("Id")
+                .setSortable(false)
+                .setResizable(true);
         requestGrid.addColumn(ExtendedRequestTemplate::getLabel).setHeader("Title").setSortable(false);
         mainLayout.add(requestGrid);
 
@@ -277,5 +279,7 @@ public class MainView extends VerticalLayout implements TemplateChangeListener {
         addRequest(batchTemplate, null);
         requestGrid.getDataProvider().refreshAll();
         requestGrid.select(batchTemplate);
+        requestGrid.expandRecursively(Collections.singletonList(batchTemplate), 100);
+        requestGrid.recalculateColumnWidths();
     }
 }

@@ -34,22 +34,22 @@ public class ResponseListLayout extends HorizontalLayout {
         setPadding(false);
 
         responseGrid = new Grid<>();
-        responseGrid.addColumn(ResponseTemplate::getPredicate).setHeader("Predicate").setWidth("20%");
-        responseGrid.addColumn(ResponseTemplate::getStatus).setHeader("Status").setWidth("10%");
+        responseGrid.addColumn(ResponseTemplate::getPredicate).setHeader("Predicate").setWidth("20%").setResizable(true);
+        responseGrid.addColumn(ResponseTemplate::getStatus).setHeader("Status").setWidth("10%").setResizable(true);
         responseGrid.addColumn(responseTemplate -> {
             try {
                 return responseTemplate.getHeaders() == null ? "" : objectMapper.writeValueAsString(responseTemplate.getHeaders());
             } catch (JsonProcessingException e) {
                 return "Error";
             }
-        }).setHeader("Headers").setWidth("35%");
+        }).setHeader("Headers").setWidth("35%").setResizable(true);
         responseGrid.addColumn(responseTemplate -> {
             try {
                 return responseTemplate.getBody() == null ? "" : objectMapper.writeValueAsString(responseTemplate.getBody());
             } catch (JsonProcessingException e) {
                 return "Error";
             }
-        }).setHeader("Body").setWidth("35%");
+        }).setHeader("Body").setWidth("35%").setResizable(true);
         responseGrid.setSizeFull();
         add(responseGrid);
 
