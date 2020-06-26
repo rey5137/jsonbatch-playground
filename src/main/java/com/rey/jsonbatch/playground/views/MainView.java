@@ -19,6 +19,9 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.treegrid.TreeGrid;
+import com.vaadin.flow.router.BeforeEvent;
+import com.vaadin.flow.router.HasUrlParameter;
+import com.vaadin.flow.router.OptionalParameter;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.theme.Theme;
@@ -37,7 +40,7 @@ import java.util.List;
 @Theme(value = Lumo.class, variant = Lumo.LIGHT)
 @Route
 @Push
-public class MainView extends VerticalLayout implements TemplateChangeListener {
+public class MainView extends VerticalLayout implements TemplateChangeListener, HasUrlParameter<String> {
 
     private Logger logger = LoggerFactory.getLogger(MainView.class);
 
@@ -109,6 +112,18 @@ public class MainView extends VerticalLayout implements TemplateChangeListener {
     }
 
     @Override
+    public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
+        if (parameter != null) {
+            String[] values = SampleData.SAMPLES.values().toArray(new String[0]);
+            if (parameter.equals("sample1")) {
+                setBatchTemplate(SampleData.load(values[0]));
+            } else if (parameter.equals("sample2")) {
+                setBatchTemplate(SampleData.load(values[1]));
+            }
+        }
+    }
+
+    @Override
     public void onTemplateChanged(ExtendedRequestTemplate requestTemplate) {
         requestGrid.getDataProvider().refreshItem(requestTemplate);
     }
@@ -127,16 +142,16 @@ public class MainView extends VerticalLayout implements TemplateChangeListener {
         List<ExtendedRequestTemplate> templates = currentTemplate.getParent().getRequests();
 
         int index = templates.indexOf(currentTemplate);
-        if(index == 0)
+        if (index == 0)
             return;
 
         templates.remove(currentTemplate);
         templates.add(index - 1, currentTemplate);
 
-        for(int i = index - 1; i < templates.size(); i++)
+        for (int i = index - 1; i < templates.size(); i++)
             removeRequest(templates.get(i));
 
-        for(int i = index - 1; i < templates.size(); i++)
+        for (int i = index - 1; i < templates.size(); i++)
             addRequest(templates.get(i), currentTemplate.getParent());
 
         requestGrid.getDataProvider().refreshAll();
@@ -147,16 +162,16 @@ public class MainView extends VerticalLayout implements TemplateChangeListener {
         List<ExtendedRequestTemplate> templates = currentTemplate.getParent().getRequests();
 
         int index = templates.indexOf(currentTemplate);
-        if(index == templates.size() - 1)
+        if (index == templates.size() - 1)
             return;
 
         templates.remove(currentTemplate);
         templates.add(index + 1, currentTemplate);
 
-        for(int i = index; i < templates.size(); i++)
+        for (int i = index; i < templates.size(); i++)
             removeRequest(templates.get(i));
 
-        for(int i = index; i < templates.size(); i++)
+        for (int i = index; i < templates.size(); i++)
             addRequest(templates.get(i), currentTemplate.getParent());
 
         requestGrid.getDataProvider().refreshAll();
@@ -181,7 +196,7 @@ public class MainView extends VerticalLayout implements TemplateChangeListener {
     }
 
     private void removeRequest(ExtendedRequestTemplate requestTemplate) {
-        for(ExtendedRequestTemplate template : requestTemplate.getRequests())
+        for (ExtendedRequestTemplate template : requestTemplate.getRequests())
             removeRequest(template);
 
         requestGrid.getTreeData().removeItem(requestTemplate);
@@ -221,7 +236,7 @@ public class MainView extends VerticalLayout implements TemplateChangeListener {
         cancelButton.addClickListener(e -> dialog.close());
         chooseButton.addClickListener(e -> {
             String value = sampleBox.getValue();
-            if(value != null && !value.isEmpty()) {
+            if (value != null && !value.isEmpty()) {
                 setBatchTemplate(SampleData.load(SampleData.SAMPLES.get(value)));
             }
             dialog.close();
