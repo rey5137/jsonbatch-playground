@@ -1,7 +1,7 @@
 package com.rey.jsonbatch.playground.views;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rey.jsonbatch.playground.SampleData;
+import com.rey.jsonbatch.playground.Utils;
 import com.rey.jsonbatch.playground.config.BatchConfiguration;
 import com.rey.jsonbatch.playground.model.ExtendedBatchTemplate;
 import com.rey.jsonbatch.playground.model.ExtendedRequestTemplate;
@@ -114,11 +114,11 @@ public class MainView extends VerticalLayout implements TemplateChangeListener, 
     @Override
     public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
         if (parameter != null) {
-            String[] values = SampleData.SAMPLES.values().toArray(new String[0]);
+            String[] values = Utils.SAMPLES.values().toArray(new String[0]);
             if (parameter.equals("sample1")) {
-                setBatchTemplate(SampleData.load(values[0]));
+                setBatchTemplate(Utils.loadFromPath(values[0]));
             } else if (parameter.equals("sample2")) {
-                setBatchTemplate(SampleData.load(values[1]));
+                setBatchTemplate(Utils.loadFromPath(values[1]));
             }
         }
     }
@@ -220,8 +220,8 @@ public class MainView extends VerticalLayout implements TemplateChangeListener, 
         final ComboBox<String> sampleBox = new ComboBox<>();
         sampleBox.setWidthFull();
         sampleBox.setLabel("Batch template");
-        sampleBox.setItems(SampleData.SAMPLES.keySet());
-        sampleBox.setValue(SampleData.SAMPLES.keySet().iterator().next());
+        sampleBox.setItems(Utils.SAMPLES.keySet());
+        sampleBox.setValue(Utils.SAMPLES.keySet().iterator().next());
         verticalLayout.add(sampleBox);
 
         HorizontalLayout horizontalLayout = new HorizontalLayout();
@@ -237,7 +237,7 @@ public class MainView extends VerticalLayout implements TemplateChangeListener, 
         chooseButton.addClickListener(e -> {
             String value = sampleBox.getValue();
             if (value != null && !value.isEmpty()) {
-                setBatchTemplate(SampleData.load(SampleData.SAMPLES.get(value)));
+                setBatchTemplate(Utils.loadFromPath(Utils.SAMPLES.get(value)));
             }
             dialog.close();
         });
@@ -258,13 +258,8 @@ public class MainView extends VerticalLayout implements TemplateChangeListener, 
         textArea.setWidthFull();
         textArea.setHeight("85%");
         textArea.setLabel("Batch template");
+        textArea.setValue(Utils.toJson(batchTemplate));
         verticalLayout.add(textArea);
-
-        try {
-            textArea.setValue(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(batchTemplate));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         HorizontalLayout horizontalLayout = new HorizontalLayout();
         horizontalLayout.setWidthFull();
@@ -278,11 +273,7 @@ public class MainView extends VerticalLayout implements TemplateChangeListener, 
 
         cancelButton.addClickListener(e -> dialog.close());
         importButton.addClickListener(e -> {
-            try {
-                setBatchTemplate(objectMapper.readValue(textArea.getValue(), ExtendedBatchTemplate.class));
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+            setBatchTemplate(Utils.loadFromJson(textArea.getValue()));
             dialog.close();
         });
         dialog.open();

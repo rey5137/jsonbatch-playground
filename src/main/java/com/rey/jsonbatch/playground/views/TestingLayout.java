@@ -4,11 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rey.jsonbatch.BatchEngine;
 import com.rey.jsonbatch.model.BatchTemplate;
+import com.rey.jsonbatch.model.LoopTemplate;
 import com.rey.jsonbatch.model.Request;
 import com.rey.jsonbatch.model.RequestTemplate;
 import com.rey.jsonbatch.model.ResponseTemplate;
 import com.rey.jsonbatch.playground.config.BatchConfiguration;
 import com.rey.jsonbatch.playground.model.ExtendedBatchTemplate;
+import com.rey.jsonbatch.playground.model.ExtendedLoopTemplate;
 import com.rey.jsonbatch.playground.model.ExtendedRequestTemplate;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickEvent;
@@ -159,17 +161,35 @@ public class TestingLayout extends HorizontalLayout {
 
     private RequestTemplate buildRequestTemplate(ExtendedRequestTemplate template) {
         RequestTemplate requestTemplate = new RequestTemplate();
-        if(template.getPredicate() != null && !template.getPredicate().isEmpty())
+        if (template.getPredicate() != null && !template.getPredicate().isEmpty())
             requestTemplate.setPredicate(template.getPredicate());
-        requestTemplate.setHttpMethod(template.getHttpMethod());
-        requestTemplate.setUrl(template.getUrl());
-        requestTemplate.setHeaders(template.getHeaders());
-        requestTemplate.setBody(template.getBody());
+
+        if(template.getUseLoop())
+            requestTemplate.setLoop(buildLoopTemplate(template.getLoop()));
+        else {
+            requestTemplate.setHttpMethod(template.getHttpMethod());
+            requestTemplate.setUrl(template.getUrl());
+            requestTemplate.setHeaders(template.getHeaders());
+            requestTemplate.setBody(template.getBody());
+            requestTemplate.setTransformers(template.getTransformers().stream().map(this::cleanData).collect(Collectors.toList()));
+        }
+
         requestTemplate.setRequests(template.getRequests().stream().map(this::buildRequestTemplate).collect(Collectors.toList()));
         requestTemplate.setResponses(template.getResponses().stream().map(this::cleanData).collect(Collectors.toList()));
-        requestTemplate.setTransformers(template.getTransformers().stream().map(this::cleanData).collect(Collectors.toList()));
-        requestTemplate.setLoop(template.getLoop());
         return requestTemplate;
+    }
+
+    private LoopTemplate buildLoopTemplate(ExtendedLoopTemplate template) {
+        if(template == null)
+            return null;
+        LoopTemplate loopTemplate = new LoopTemplate();
+        loopTemplate.setCounterInit(template.getCounterInit());
+        loopTemplate.setCounterPredicate(template.getCounterPredicate());
+        loopTemplate.setCounterUpdate(template.getCounterUpdate());
+        loopTemplate.setRequests(template.getRequests().stream()
+                .map(this::buildRequestTemplate)
+                .collect(Collectors.toList()));
+        return loopTemplate;
     }
 
     private Request buildOriginalRequest() {
@@ -178,15 +198,17 @@ public class TestingLayout extends HorizontalLayout {
         request.setUrl(urlField.getValue());
         try {
             request.setHeaders(objectMapper.readValue(headersField.getValue(), Map.class));
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
         try {
             request.setBody(objectMapper.readValue(bodyField.getValue(), Object.class));
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
         return request;
     }
 
     private ResponseTemplate cleanData(ResponseTemplate template) {
-        if(template.getPredicate() != null && template.getPredicate().isEmpty())
+        if (template.getPredicate() != null && template.getPredicate().isEmpty())
             template.setPredicate(null);
         return template;
     }

@@ -2,7 +2,6 @@ package com.rey.jsonbatch.playground.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.rey.jsonbatch.model.LoopTemplate;
 import com.rey.jsonbatch.model.ResponseTemplate;
 
 import java.util.ArrayList;
@@ -12,6 +11,9 @@ import java.util.List;
 public class ExtendedRequestTemplate {
 
     private String title;
+
+    @JsonIgnore
+    private boolean useLoop = false;
 
     @JsonIgnore
     private ExtendedRequestTemplate parent;
@@ -32,7 +34,7 @@ public class ExtendedRequestTemplate {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<ResponseTemplate> responses = new ArrayList<>();
 
-    private LoopTemplate loop;
+    private ExtendedLoopTemplate loop;
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<ResponseTemplate> transformers = new ArrayList<>();
@@ -93,11 +95,19 @@ public class ExtendedRequestTemplate {
         this.responses = responses;
     }
 
-    public LoopTemplate getLoop() {
+    public boolean getUseLoop() {
+        return useLoop;
+    }
+
+    public void setUseLoop(boolean useLoop) {
+        this.useLoop = useLoop;
+    }
+
+    public ExtendedLoopTemplate getLoop() {
         return loop;
     }
 
-    public void setLoop(LoopTemplate loop) {
+    public void setLoop(ExtendedLoopTemplate loop) {
         this.loop = loop;
     }
 
