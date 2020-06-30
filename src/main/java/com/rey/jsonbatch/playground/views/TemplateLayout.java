@@ -19,10 +19,12 @@ public class TemplateLayout extends VerticalLayout {
     Tabs tabs;
 
     Tab detailsTab;
+    Tab loopTab;
     Tab responsesTab;
     Tab testingTab;
 
     RequestDetailsLayout requestDetailsLayout;
+    LoopDetailsLayout loopDetailsLayout;
     ResponseListLayout responseListLayout;
     TestingLayout testingLayout;
 
@@ -40,15 +42,21 @@ public class TemplateLayout extends VerticalLayout {
         add(container);
 
         detailsTab = new Tab("Details");
+        loopTab = new Tab("Loop");
         responsesTab = new Tab("Responses");
         testingTab = new Tab("Testing");
-        tabs = new Tabs(detailsTab, responsesTab, testingTab);
+        tabs = new Tabs(detailsTab, loopTab, responsesTab, testingTab);
         container.add(tabs);
 
         requestDetailsLayout = new RequestDetailsLayout(templateChangeListener);
         requestDetailsLayout.setSizeFull();
         requestDetailsLayout.setVisible(true);
         container.add(requestDetailsLayout);
+
+        loopDetailsLayout = new LoopDetailsLayout(requestTemplate -> requestDetailsLayout.setRequestTemplate(requestTemplate));
+        loopDetailsLayout.setSizeFull();
+        loopDetailsLayout.setVisible(false);
+        container.add(loopDetailsLayout);
 
         responseListLayout = new ResponseListLayout();
         responseListLayout.setSizeFull();
@@ -66,6 +74,7 @@ public class TemplateLayout extends VerticalLayout {
 
     private void onTabSelectedChanged(Tab selectedTab) {
         requestDetailsLayout.setVisible(selectedTab == detailsTab);
+        loopDetailsLayout.setVisible(selectedTab == loopTab);
         responseListLayout.setVisible(selectedTab == responsesTab);
         testingLayout.setVisible(selectedTab == testingTab);
     }
@@ -76,16 +85,21 @@ public class TemplateLayout extends VerticalLayout {
         if(requestTemplate == null) {
             container.setVisible(false);
             requestDetailsLayout.setRequestTemplate(null);
+            loopDetailsLayout.setRequestTemplate(null);
             responseListLayout.setResponseTemplates(Collections.emptyList());
             testingLayout.setBatchTemplate(null);
         }
         else {
             if(requestTemplate instanceof ExtendedBatchTemplate) {
+                loopTab.setVisible(false);
                 testingTab.setVisible(true);
                 testingLayout.setBatchTemplate((ExtendedBatchTemplate)requestTemplate);
             }
-            else
+            else {
+                loopTab.setVisible(true);
                 testingTab.setVisible(false);
+                loopDetailsLayout.setRequestTemplate(requestTemplate);
+            }
             container.setVisible(true);
             tabs.setSelectedTab(detailsTab);
             requestDetailsLayout.setRequestTemplate(requestTemplate);

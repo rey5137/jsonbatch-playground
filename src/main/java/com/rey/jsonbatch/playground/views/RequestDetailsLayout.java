@@ -107,10 +107,10 @@ public class RequestDetailsLayout extends VerticalLayout {
             else {
                 titleField.setValue(Optional.ofNullable(requestTemplate.getTitle()).orElse(""));
                 predicateField.setVisible(true);
-                methodComboBox.setVisible(true);
-                urlField.setVisible(true);
-                headersField.setVisible(true);
-                bodyField.setVisible(true);
+                methodComboBox.setVisible(!requestTemplate.getUseLoop());
+                urlField.setVisible(!requestTemplate.getUseLoop());
+                headersField.setVisible(!requestTemplate.getUseLoop());
+                bodyField.setVisible(!requestTemplate.getUseLoop());
                 predicateField.setValue(Optional.ofNullable(requestTemplate.getPredicate()).orElse(""));
                 methodComboBox.setValue(Optional.ofNullable(requestTemplate.getHttpMethod()).orElse("").toUpperCase());
                 urlField.setValue(Optional.ofNullable(requestTemplate.getUrl()).orElse(""));
@@ -163,25 +163,21 @@ public class RequestDetailsLayout extends VerticalLayout {
 
     private void onMethodChanged(AbstractField.ComponentValueChangeEvent<ComboBox<String>, String> event) {
         requestTemplate.setHttpMethod(event.getValue());
-        templateChangeListener.onTemplateChanged(requestTemplate);
     }
 
     private void onUrlChanged(AbstractField.ComponentValueChangeEvent<TextField, String> event) {
         requestTemplate.setUrl(event.getValue());
-        templateChangeListener.onTemplateChanged(requestTemplate);
     }
 
     private void onHeadersChanged(AbstractField.ComponentValueChangeEvent<TextArea, String> event) {
         try {
             requestTemplate.setHeaders(objectMapper.readValue(event.getValue(), Object.class));
-            templateChangeListener.onTemplateChanged(requestTemplate);
         } catch (JsonProcessingException e) {}
     }
 
     private void onBodyChanged(AbstractField.ComponentValueChangeEvent<TextArea, String> event) {
         try {
             requestTemplate.setBody(objectMapper.readValue(event.getValue(), Object.class));
-            templateChangeListener.onTemplateChanged(requestTemplate);
         } catch (JsonProcessingException e) {}
     }
 }

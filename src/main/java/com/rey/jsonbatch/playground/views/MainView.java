@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rey.jsonbatch.playground.Utils;
 import com.rey.jsonbatch.playground.config.BatchConfiguration;
 import com.rey.jsonbatch.playground.model.ExtendedBatchTemplate;
+import com.rey.jsonbatch.playground.model.ExtendedLoopTemplate;
 import com.rey.jsonbatch.playground.model.ExtendedRequestTemplate;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ClickEvent;
@@ -181,6 +182,7 @@ public class MainView extends VerticalLayout implements TemplateChangeListener, 
         ExtendedRequestTemplate currentTemplate = templateLayout.getRequestTemplate();
         ExtendedRequestTemplate newTemplate = new ExtendedRequestTemplate();
         newTemplate.setParent(currentTemplate);
+        newTemplate.setLoop(new ExtendedLoopTemplate());
         currentTemplate.getRequests().add(newTemplate);
 
         requestGrid.getTreeData().addItem(currentTemplate, newTemplate);

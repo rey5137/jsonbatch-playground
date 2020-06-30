@@ -1,5 +1,6 @@
 package com.rey.jsonbatch.playground;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rey.jsonbatch.model.ResponseTemplate;
 import com.rey.jsonbatch.playground.config.BatchConfiguration;
@@ -7,7 +8,10 @@ import com.rey.jsonbatch.playground.model.ExtendedBatchTemplate;
 import com.rey.jsonbatch.playground.model.ExtendedLoopTemplate;
 import com.rey.jsonbatch.playground.model.ExtendedRequestTemplate;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.LinkedHashMap;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Utils {
@@ -44,6 +48,8 @@ public class Utils {
             child.setParent(template);
             if(template.getLoop() != null)
                 template.setUseLoop(true);
+            else
+                template.setLoop(new ExtendedLoopTemplate());
         }
         return template;
     }
@@ -110,4 +116,26 @@ public class Utils {
         return responseTemplate;
     }
 
+    public static Object parseData(String value) {
+        try {
+            return objectMapper.readValue(value, Object.class);
+        } catch (JsonProcessingException e) {
+            Pattern pattern = Pattern.compile("^[0123456789.]*$");
+            if (pattern.matcher(value).matches()) {
+                if (value.contains(".")) {
+                    try {
+                        return new BigDecimal(value);
+                    } catch (NumberFormatException ex) {}
+                } else {
+                    try {
+                        return new BigInteger(value);
+                    } catch (NumberFormatException ex) {}
+                }
+            }
+            if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
+                return value.equalsIgnoreCase("true");
+            }
+            return value;
+        }
+    }
 }
