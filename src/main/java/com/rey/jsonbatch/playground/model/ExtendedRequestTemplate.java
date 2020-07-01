@@ -12,8 +12,7 @@ public class ExtendedRequestTemplate {
 
     private String title;
 
-    @JsonIgnore
-    private boolean useLoop = false;
+    private Boolean useLoop = false;
 
     @JsonIgnore
     private ExtendedRequestTemplate parent;
@@ -95,11 +94,11 @@ public class ExtendedRequestTemplate {
         this.responses = responses;
     }
 
-    public boolean getUseLoop() {
+    public Boolean getUseLoop() {
         return useLoop;
     }
 
-    public void setUseLoop(boolean useLoop) {
+    public void setUseLoop(Boolean useLoop) {
         this.useLoop = useLoop;
     }
 

@@ -49,7 +49,6 @@ public class MainView extends VerticalLayout implements TemplateChangeListener, 
     ButtonLayout buttonLayout;
     TemplateLayout templateLayout;
 
-    private ObjectMapper objectMapper = BatchConfiguration.objectMapper();
     private ExtendedBatchTemplate batchTemplate;
 
     public MainView() {
@@ -116,10 +115,16 @@ public class MainView extends VerticalLayout implements TemplateChangeListener, 
     public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
         if (parameter != null) {
             String[] values = Utils.SAMPLES.values().toArray(new String[0]);
-            if (parameter.equals("sample1")) {
-                setBatchTemplate(Utils.loadFromPath(values[0]));
-            } else if (parameter.equals("sample2")) {
-                setBatchTemplate(Utils.loadFromPath(values[1]));
+            switch (parameter) {
+                case "sample1":
+                    setBatchTemplate(Utils.loadFromPath(values[0]));
+                    break;
+                case "sample2":
+                    setBatchTemplate(Utils.loadFromPath(values[1]));
+                    break;
+                case "sample3":
+                    setBatchTemplate(Utils.loadFromPath(values[2]));
+                    break;
             }
         }
     }

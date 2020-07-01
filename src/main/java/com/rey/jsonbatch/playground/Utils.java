@@ -11,6 +11,7 @@ import com.rey.jsonbatch.playground.model.ExtendedRequestTemplate;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -24,6 +25,7 @@ public class Utils {
         SAMPLES = new LinkedHashMap<>();
         SAMPLES.put("Get & create post", "sample/first.json");
         SAMPLES.put("Search & group post by user", "sample/second.json");
+        SAMPLES.put("Loop & get each user posts", "sample/third.json");
     }
 
     public static ExtendedBatchTemplate loadFromPath(String path) {
@@ -46,7 +48,9 @@ public class Utils {
         for (ExtendedRequestTemplate child : template.getRequests()) {
             cleanData(child);
             child.setParent(template);
-            if(template.getLoop() != null)
+        }
+        if(!(template instanceof ExtendedBatchTemplate)) {
+            if (template.getLoop() != null)
                 template.setUseLoop(true);
             else
                 template.setLoop(new ExtendedLoopTemplate());
@@ -62,6 +66,14 @@ public class Utils {
         }
     }
 
+    public static String toJson(List<ExtendedRequestTemplate> requestTemplates) {
+        try {
+            return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(requestTemplates.stream().map(Utils::cloneRequestTemplate).collect(Collectors.toList()));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private static ExtendedBatchTemplate cloneBatchTemplate(ExtendedBatchTemplate template) {
         ExtendedBatchTemplate batchTemplate = new ExtendedBatchTemplate();
         batchTemplate.setTitle(template.getTitle());
@@ -69,6 +81,7 @@ public class Utils {
         batchTemplate.setResponses(template.getResponses().stream().map(Utils::cloneResponseTemplate).collect(Collectors.toList()));
         batchTemplate.setDispatchOptions(template.getDispatchOptions());
         batchTemplate.setLoopOptions(template.getLoopOptions());
+        batchTemplate.setUseLoop(null);
         return batchTemplate;
     }
 
@@ -88,6 +101,7 @@ public class Utils {
             requestTemplate.setTransformers(template.getTransformers().stream().map(Utils::cloneResponseTemplate).collect(Collectors.toList()));
         }
 
+        requestTemplate.setUseLoop(null);
         requestTemplate.setRequests(template.getRequests().stream().map(Utils::cloneRequestTemplate).collect(Collectors.toList()));
         requestTemplate.setResponses(template.getResponses().stream().map(Utils::cloneResponseTemplate).collect(Collectors.toList()));
         return requestTemplate;

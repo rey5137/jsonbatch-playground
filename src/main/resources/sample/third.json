@@ -1,0 +1,44 @@
+{
+  "title": "Batch: Loop & get each user posts",
+  "requests": [
+    {
+      "title": "Search all users",
+      "http_method": "GET",
+      "url": "https://jsonplaceholder.typicode.com/users",
+      "headers": {
+        "Accept": "str application/json, */*"
+      },
+      "body": null,
+      "requests": [
+        {
+          "title": "Loop each user",
+          "loop": {
+            "counter_init": 0,
+            "counter_predicate": "__cmp(\"@{$.requests[1].counter}@ < @{$.responses[0].body.length()}@\")",
+            "counter_update": "__groovy(\"@{$.requests[1].counter}@ + 1\")",
+            "requests": [
+              {
+                "title": "Get user posts",
+                "http_method": "GET",
+                "url": "https://jsonplaceholder.typicode.com/users/@{$.responses[0].body[@{$.requests[1].counter}@].id}@/posts",
+                "headers": {
+                  "Accept": "str application/json, */*"
+                },
+                "body": null
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "responses": [
+  ],
+  "dispatch_options": {
+    "fail_back_as_string": true,
+    "ignore_parsing_error": true
+  },
+  "loop_options": {
+    "max_loop_time": 20
+  }
+}

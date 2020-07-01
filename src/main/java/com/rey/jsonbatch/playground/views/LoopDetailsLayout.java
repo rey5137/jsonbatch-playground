@@ -7,8 +7,13 @@ import com.rey.jsonbatch.playground.config.BatchConfiguration;
 import com.rey.jsonbatch.playground.model.ExtendedLoopTemplate;
 import com.rey.jsonbatch.playground.model.ExtendedRequestTemplate;
 import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.shared.Registration;
@@ -28,6 +33,8 @@ public class LoopDetailsLayout extends VerticalLayout {
     TextField counterInitField;
     TextField counterPredicateField;
     TextField counterUpdateField;
+    TextArea requestsArea;
+    HorizontalLayout requestsLayout;
 
     private ExtendedRequestTemplate requestTemplate;
 
@@ -63,6 +70,23 @@ public class LoopDetailsLayout extends VerticalLayout {
         counterUpdateField.setWidthFull();
         counterUpdateField.setValueChangeMode(ValueChangeMode.LAZY);
         add(counterUpdateField);
+
+        requestsLayout = new HorizontalLayout();
+        requestsLayout.setSizeFull();
+        requestsLayout.setMaxHeight("80%");
+        add(requestsLayout);
+        setFlexGrow(1f, requestsLayout);
+
+        requestsArea = new TextArea();
+        requestsArea.setLabel("Loop requests");
+        requestsArea.setSizeFull();
+        requestsArea.setReadOnly(true);
+        requestsLayout.add(requestsArea);
+
+        Button editButton = new Button(new Icon(VaadinIcon.EDIT));
+        editButton.setSizeUndefined();
+        editButton.getStyle().set("margin-top", "2.5em");
+        requestsLayout.add(editButton);
     }
 
     public void setRequestTemplate(ExtendedRequestTemplate requestTemplate) {
@@ -74,9 +98,11 @@ public class LoopDetailsLayout extends VerticalLayout {
             counterInitField.setValue(Optional.ofNullable(loopTemplate.getCounterInit()).map(this::toJson).orElse(""));
             counterPredicateField.setValue(Optional.ofNullable(loopTemplate.getCounterPredicate()).map(this::toJson).orElse(""));
             counterUpdateField.setValue(Optional.ofNullable(loopTemplate.getCounterUpdate()).map(this::toJson).orElse(""));
+            requestsArea.setValue(Utils.toJson(loopTemplate.getRequests()));
             counterInitField.setVisible(enable);
             counterPredicateField.setVisible(enable);
             counterUpdateField.setVisible(enable);
+            requestsLayout.setVisible(enable);
             Collections.addAll(registrations,
                     enableBox.addValueChangeListener(this::onEnableChanged),
                     counterInitField.addValueChangeListener(this::onCounterInitChanged),
@@ -90,6 +116,7 @@ public class LoopDetailsLayout extends VerticalLayout {
             counterInitField.setValue("");
             counterPredicateField.setValue("");
             counterUpdateField.setValue("");
+            requestsArea.setValue("");
         }
     }
 
@@ -108,6 +135,7 @@ public class LoopDetailsLayout extends VerticalLayout {
         counterInitField.setVisible(enable);
         counterPredicateField.setVisible(enable);
         counterUpdateField.setVisible(enable);
+        requestsLayout.setVisible(enable);
         templateChangeListener.onTemplateChanged(requestTemplate);
     }
 
