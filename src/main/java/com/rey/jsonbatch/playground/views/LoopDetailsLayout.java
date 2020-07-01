@@ -44,7 +44,7 @@ public class LoopDetailsLayout extends VerticalLayout {
 
     private TemplateChangeListener templateChangeListener;
 
-    public LoopDetailsLayout(TemplateChangeListener templateChangeListener) {
+    public LoopDetailsLayout(TemplateChangeListener templateChangeListener, LoopEditListener loopEditListener) {
         this.templateChangeListener = templateChangeListener;
         setSizeFull();
         setSpacing(false);
@@ -87,11 +87,13 @@ public class LoopDetailsLayout extends VerticalLayout {
         editButton.setSizeUndefined();
         editButton.getStyle().set("margin-top", "2.5em");
         requestsLayout.add(editButton);
+        editButton.addClickListener(event -> loopEditListener.onEditLoopRequests(requestTemplate.getLoop()));
     }
 
     public void setRequestTemplate(ExtendedRequestTemplate requestTemplate) {
         this.requestTemplate = requestTemplate;
-        if (requestTemplate.getLoop() != null) {
+
+        if (requestTemplate != null && requestTemplate.getLoop() != null) {
             boolean enable = requestTemplate.getUseLoop();
             ExtendedLoopTemplate loopTemplate = requestTemplate.getLoop();
             enableBox.setValue(enable);

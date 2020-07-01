@@ -48,10 +48,18 @@ public class Utils {
         for (ExtendedRequestTemplate child : template.getRequests()) {
             cleanData(child);
             child.setParent(template);
+
         }
         if(!(template instanceof ExtendedBatchTemplate)) {
-            if (template.getLoop() != null)
+            if (template.getLoop() != null) {
                 template.setUseLoop(true);
+                ExtendedLoopTemplate loopTemplate = template.getLoop();
+                loopTemplate.setParent(template);
+                for(ExtendedRequestTemplate child : loopTemplate.getRequests()) {
+                    cleanData(child);
+                    child.setParent(loopTemplate);
+                }
+            }
             else
                 template.setLoop(new ExtendedLoopTemplate());
         }

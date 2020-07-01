@@ -1,8 +1,6 @@
 package com.rey.jsonbatch.playground.views;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rey.jsonbatch.playground.Utils;
-import com.rey.jsonbatch.playground.config.BatchConfiguration;
 import com.rey.jsonbatch.playground.model.ExtendedBatchTemplate;
 import com.rey.jsonbatch.playground.model.ExtendedLoopTemplate;
 import com.rey.jsonbatch.playground.model.ExtendedRequestTemplate;
@@ -30,6 +28,7 @@ import com.vaadin.flow.theme.lumo.Lumo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -41,7 +40,7 @@ import java.util.List;
 @Theme(value = Lumo.class, variant = Lumo.LIGHT)
 @Route
 @Push
-public class MainView extends VerticalLayout implements TemplateChangeListener, HasUrlParameter<String> {
+public class MainView extends VerticalLayout implements TemplateChangeListener, HasUrlParameter<String>, LoopEditListener {
 
     private Logger logger = LoggerFactory.getLogger(MainView.class);
 
@@ -49,7 +48,7 @@ public class MainView extends VerticalLayout implements TemplateChangeListener, 
     ButtonLayout buttonLayout;
     TemplateLayout templateLayout;
 
-    private ExtendedBatchTemplate batchTemplate;
+    private List<ExtendedRequestTemplate> templateList = new ArrayList<>();
 
     public MainView() {
         setSizeFull();
@@ -101,14 +100,12 @@ public class MainView extends VerticalLayout implements TemplateChangeListener, 
         buttonLayout.setRemoveButtonEnabled(false);
         mainLayout.add(buttonLayout);
 
-        templateLayout = new TemplateLayout(this);
+        templateLayout = new TemplateLayout(this, this);
         templateLayout.setWidth("70%");
         mainLayout.add(templateLayout);
 
         requestGrid.asSingleSelect().addValueChangeListener(this::onRequestChanged);
-        batchTemplate = new ExtendedBatchTemplate();
-        addRequest(batchTemplate, null);
-        requestGrid.select(batchTemplate);
+        setBatchTemplate(new ExtendedBatchTemplate());
     }
 
     @Override
@@ -134,13 +131,19 @@ public class MainView extends VerticalLayout implements TemplateChangeListener, 
         requestGrid.getDataProvider().refreshItem(requestTemplate);
     }
 
+    @Override
+    public void onEditLoopRequests(ExtendedLoopTemplate loopTemplate) {
+        setLoopTemplate(loopTemplate);
+    }
+
     private void onRequestChanged(AbstractField.ComponentValueChangeEvent<Grid<ExtendedRequestTemplate>, ExtendedRequestTemplate> event) {
         ExtendedRequestTemplate currentTemplate = event.getValue();
+        boolean showUpDown = currentTemplate != null && !(currentTemplate instanceof ExtendedBatchTemplate) && !(currentTemplate instanceof ExtendedLoopTemplate);
         templateLayout.setRequestTemplate(currentTemplate);
-        buttonLayout.setUpButtonEnabled(currentTemplate != null && !(currentTemplate instanceof ExtendedBatchTemplate));
-        buttonLayout.setDownButtonEnabled(currentTemplate != null && !(currentTemplate instanceof ExtendedBatchTemplate));
+        buttonLayout.setUpButtonEnabled(showUpDown);
+        buttonLayout.setDownButtonEnabled(showUpDown);
         buttonLayout.setAddButtonEnabled(currentTemplate != null);
-        buttonLayout.setRemoveButtonEnabled(currentTemplate != null && !(currentTemplate instanceof ExtendedBatchTemplate));
+        buttonLayout.setRemoveButtonEnabled(showUpDown);
     }
 
     private void onRequestUpClicked(ClickEvent<Button> event) {
@@ -265,7 +268,7 @@ public class MainView extends VerticalLayout implements TemplateChangeListener, 
         textArea.setWidthFull();
         textArea.setHeight("85%");
         textArea.setLabel("Batch template");
-        textArea.setValue(Utils.toJson(batchTemplate));
+        textArea.setValue(Utils.toJson((ExtendedBatchTemplate) templateList.get(0)));
         verticalLayout.add(textArea);
 
         HorizontalLayout horizontalLayout = new HorizontalLayout();
@@ -287,7 +290,8 @@ public class MainView extends VerticalLayout implements TemplateChangeListener, 
     }
 
     private void setBatchTemplate(ExtendedBatchTemplate batchTemplate) {
-        this.batchTemplate = batchTemplate;
+        templateList.clear();
+        templateList.add(batchTemplate);
         requestGrid.getTreeData().clear();
         addRequest(batchTemplate, null);
         requestGrid.getDataProvider().refreshAll();
@@ -295,4 +299,15 @@ public class MainView extends VerticalLayout implements TemplateChangeListener, 
         requestGrid.expandRecursively(Collections.singletonList(batchTemplate), 100);
         requestGrid.recalculateColumnWidths();
     }
+
+    private void setLoopTemplate(ExtendedLoopTemplate loopTemplate) {
+        templateList.add(loopTemplate);
+        requestGrid.getTreeData().clear();
+        addRequest(loopTemplate, null);
+        requestGrid.getDataProvider().refreshAll();
+        requestGrid.select(loopTemplate);
+        requestGrid.expandRecursively(Collections.singletonList(loopTemplate), 100);
+        requestGrid.recalculateColumnWidths();
+    }
+
 }

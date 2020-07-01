@@ -1,6 +1,7 @@
 package com.rey.jsonbatch.playground.views;
 
 import com.rey.jsonbatch.playground.model.ExtendedBatchTemplate;
+import com.rey.jsonbatch.playground.model.ExtendedLoopTemplate;
 import com.rey.jsonbatch.playground.model.ExtendedRequestTemplate;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
@@ -30,7 +31,7 @@ public class TemplateLayout extends VerticalLayout {
 
     private ExtendedRequestTemplate requestTemplate;
 
-    public TemplateLayout(TemplateChangeListener templateChangeListener) {
+    public TemplateLayout(TemplateChangeListener templateChangeListener, LoopEditListener loopEditListener) {
         setSizeFull();
         setSpacing(false);
         setPadding(false);
@@ -53,7 +54,7 @@ public class TemplateLayout extends VerticalLayout {
         requestDetailsLayout.setVisible(true);
         container.add(requestDetailsLayout);
 
-        loopDetailsLayout = new LoopDetailsLayout(requestTemplate -> requestDetailsLayout.setRequestTemplate(requestTemplate));
+        loopDetailsLayout = new LoopDetailsLayout(requestTemplate -> requestDetailsLayout.setRequestTemplate(requestTemplate), loopEditListener);
         loopDetailsLayout.setSizeFull();
         loopDetailsLayout.setVisible(false);
         container.add(loopDetailsLayout);
@@ -81,8 +82,7 @@ public class TemplateLayout extends VerticalLayout {
 
     public void setRequestTemplate(ExtendedRequestTemplate requestTemplate) {
         this.requestTemplate = requestTemplate;
-
-        if(requestTemplate == null) {
+        if(requestTemplate == null || requestTemplate instanceof ExtendedLoopTemplate) {
             container.setVisible(false);
             requestDetailsLayout.setRequestTemplate(null);
             loopDetailsLayout.setRequestTemplate(null);
