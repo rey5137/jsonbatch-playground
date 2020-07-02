@@ -6,6 +6,7 @@ import com.rey.jsonbatch.playground.model.ExtendedLoopTemplate;
 import com.rey.jsonbatch.playground.model.ExtendedRequestTemplate;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -13,6 +14,8 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.Push;
@@ -47,6 +50,7 @@ public class MainView extends VerticalLayout implements TemplateChangeListener, 
     TreeGrid<ExtendedRequestTemplate> requestGrid;
     ButtonLayout buttonLayout;
     TemplateLayout templateLayout;
+    Button backButton;
 
     private List<ExtendedRequestTemplate> templateList = new ArrayList<>();
 
@@ -78,15 +82,26 @@ public class MainView extends VerticalLayout implements TemplateChangeListener, 
         mainLayout.setPadding(false);
         add(mainLayout);
 
+        VerticalLayout leftLayout = new VerticalLayout();
+        leftLayout.setHeightFull();
+        leftLayout.setWidth("30%");
+        leftLayout.setPadding(false);
+        mainLayout.add(leftLayout);
+
+        backButton = new Button(new Icon(VaadinIcon.ARROW_LEFT));
+        backButton.setWidthFull();
+        backButton.setIconAfterText(false);
+        backButton.addClickListener(this::onBackClicked);
+        leftLayout.add(backButton);
+
         requestGrid = new TreeGrid<>();
-        requestGrid.setHeightFull();
-        requestGrid.setWidth("30%");
+        requestGrid.setSizeFull();
         requestGrid.addHierarchyColumn(template -> Integer.toString(System.identityHashCode(template), 34).toUpperCase())
                 .setHeader("Id")
                 .setSortable(false)
                 .setResizable(true);
         requestGrid.addColumn(ExtendedRequestTemplate::getLabel).setHeader("Title").setSortable(false);
-        mainLayout.add(requestGrid);
+        leftLayout.add(requestGrid);
 
         buttonLayout = new ButtonLayout(false);
         buttonLayout.setSizeUndefined();
@@ -289,7 +304,28 @@ public class MainView extends VerticalLayout implements TemplateChangeListener, 
         dialog.open();
     }
 
+    private void onBackClicked(ClickEvent<Button> event) {
+        int size = templateList.size();
+        if(size > 1) {
+            templateList.remove(size - 1);
+            ExtendedRequestTemplate template = templateList.get(size - 2);
+            if(template instanceof ExtendedLoopTemplate) {
+                backButton.setText("Back to " + templateList.get(size - 3).getLabel());
+                backButton.setVisible(true);
+                requestGrid.getTreeData().clear();
+                addRequest(template, null);
+                requestGrid.getDataProvider().refreshAll();
+                requestGrid.select(template);
+                requestGrid.expandRecursively(Collections.singletonList(template), 100);
+                requestGrid.recalculateColumnWidths();
+            }
+            else
+                setBatchTemplate((ExtendedBatchTemplate)template);
+        }
+    }
+
     private void setBatchTemplate(ExtendedBatchTemplate batchTemplate) {
+        backButton.setVisible(false);
         templateList.clear();
         templateList.add(batchTemplate);
         requestGrid.getTreeData().clear();
@@ -301,6 +337,8 @@ public class MainView extends VerticalLayout implements TemplateChangeListener, 
     }
 
     private void setLoopTemplate(ExtendedLoopTemplate loopTemplate) {
+        backButton.setText("Back to " + templateList.get(templateList.size() - 1).getLabel());
+        backButton.setVisible(true);
         templateList.add(loopTemplate);
         requestGrid.getTreeData().clear();
         addRequest(loopTemplate, null);

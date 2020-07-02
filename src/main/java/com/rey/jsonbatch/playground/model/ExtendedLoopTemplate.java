@@ -37,4 +37,8 @@ public class ExtendedLoopTemplate extends ExtendedRequestTemplate {
         this.counterUpdate = counterUpdate;
     }
 
+    @Override
+    public String getLabel() {
+        return String.format("Loop: %s", getParent().getLabel());
+    }
 }
