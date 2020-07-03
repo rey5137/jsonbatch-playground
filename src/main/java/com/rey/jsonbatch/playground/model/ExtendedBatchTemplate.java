@@ -9,9 +9,9 @@ import com.rey.jsonbatch.model.LoopOptions;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ExtendedBatchTemplate extends ExtendedRequestTemplate {
 
-    private DispatchOptions dispatchOptions;
+    private DispatchOptions dispatchOptions = new DispatchOptions();
 
-    private LoopOptions loopOptions;
+    private LoopOptions loopOptions = new LoopOptions();
 
     public DispatchOptions getDispatchOptions() {
         return dispatchOptions;

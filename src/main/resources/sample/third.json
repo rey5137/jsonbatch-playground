@@ -33,6 +33,18 @@
     }
   ],
   "responses": [
+    {
+      "status": 200,
+      "headers": null,
+      "body": [
+        {
+          "user_id": "$.id",
+          "name": "$.name",
+          "post_ids": "$$.responses[1].times[?(@[0].body[0].userId == @{$.id}@)][0].body[*].id",
+          "__array_schema": "$.responses[0].body"
+        }
+      ]
+    }
   ],
   "dispatch_options": {
     "fail_back_as_string": true,

@@ -6,11 +6,17 @@ import com.rey.jsonbatch.playground.config.BatchConfiguration;
 import com.rey.jsonbatch.playground.model.ExtendedBatchTemplate;
 import com.rey.jsonbatch.playground.model.ExtendedRequestTemplate;
 import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.H4;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.shared.Registration;
 
@@ -23,10 +29,18 @@ public class RequestDetailsLayout extends VerticalLayout {
 
     TextField titleField;
     TextField predicateField;
+
+    VerticalLayout requestLayout;
     ComboBox<String> methodComboBox;
     TextField urlField;
     TextArea headersField;
     TextArea bodyField;
+
+    VerticalLayout optionsLayout;
+    Checkbox failBackAsStringBox;
+    Checkbox ignoreParsingErrorBox;
+    TextField maxLoopTimeField;
+
 
     private List<Registration> registrations = new ArrayList<>();
 
@@ -48,15 +62,26 @@ public class RequestDetailsLayout extends VerticalLayout {
         titleField.setValueChangeMode(ValueChangeMode.LAZY);
         add(titleField);
 
+        buildRequestLayout();
+        buildOptionsLayout();
+    }
+
+    private void buildRequestLayout() {
+        requestLayout = new VerticalLayout();
+        requestLayout.setPadding(false);
+        requestLayout.setSpacing(false);
+        requestLayout.setSizeFull();
+        add(requestLayout);
+
         predicateField = new TextField();
         predicateField.setLabel("Predicate");
         predicateField.setWidthFull();
         predicateField.setValueChangeMode(ValueChangeMode.LAZY);
-        add(predicateField);
+        requestLayout.add(predicateField);
 
         HorizontalLayout urlLayout = new HorizontalLayout();
         urlLayout.setWidthFull();
-        add(urlLayout);
+        requestLayout.add(urlLayout);
 
         methodComboBox = new ComboBox<>();
         methodComboBox.setItems("GET", "POST", "PUT", "PATCH", "DELETE");
@@ -73,7 +98,7 @@ public class RequestDetailsLayout extends VerticalLayout {
         HorizontalLayout layout = new HorizontalLayout();
         layout.setSizeFull();
         layout.setMaxHeight("60%");
-        add(layout);
+        requestLayout.add(layout);
 
         headersField = new TextArea();
         headersField.setLabel("Headers");
@@ -90,23 +115,63 @@ public class RequestDetailsLayout extends VerticalLayout {
         layout.add(bodyField);
     }
 
+    private void buildOptionsLayout() {
+        optionsLayout = new VerticalLayout();
+        optionsLayout.setPadding(false);
+        optionsLayout.setSpacing(false);
+        optionsLayout.setSizeFull();
+        add(optionsLayout);
+
+        optionsLayout.add(new H4("Dispatch options"));
+
+        HorizontalLayout dispatchLayout = new HorizontalLayout();
+        dispatchLayout.setPadding(false);
+        dispatchLayout.setWidthFull();
+        optionsLayout.add(dispatchLayout);
+
+        failBackAsStringBox = new Checkbox("Fail back as string");
+        failBackAsStringBox.setWidth("50%");
+        dispatchLayout.add(failBackAsStringBox);
+
+        ignoreParsingErrorBox = new Checkbox("Ignore parsing error");
+        ignoreParsingErrorBox.setWidth("50%");
+        dispatchLayout.add(ignoreParsingErrorBox);
+
+        optionsLayout.add(new H4("Loop options"));
+
+        maxLoopTimeField = new TextField("Max loop time");
+        maxLoopTimeField.setWidth("50%");
+        maxLoopTimeField.setPattern("[0-9]*");
+        maxLoopTimeField.setValueChangeMode(ValueChangeMode.LAZY);
+        optionsLayout.add(maxLoopTimeField);
+
+    }
+
     public void setRequestTemplate(ExtendedRequestTemplate requestTemplate) {
         this.requestTemplate = requestTemplate;
+        registrations.forEach(Registration::remove);
+        registrations.clear();
+
         if (this.requestTemplate != null) {
-            if(this.requestTemplate instanceof ExtendedBatchTemplate) {
-                titleField.setValue(Optional.ofNullable(requestTemplate.getTitle()).orElse(""));
-                predicateField.setVisible(false);
-                methodComboBox.setVisible(false);
-                urlField.setVisible(false);
-                headersField.setVisible(false);
-                bodyField.setVisible(false);
+            if (this.requestTemplate instanceof ExtendedBatchTemplate) {
+                ExtendedBatchTemplate batchTemplate = (ExtendedBatchTemplate) this.requestTemplate;
+                titleField.setValue(Optional.ofNullable(batchTemplate.getTitle()).orElse(""));
+                optionsLayout.setVisible(true);
+                requestLayout.setVisible(false);
+                failBackAsStringBox.setValue(batchTemplate.getDispatchOptions().getFailBackAsString());
+                ignoreParsingErrorBox.setValue(batchTemplate.getDispatchOptions().getIgnoreParsingError());
+                maxLoopTimeField.setValue(batchTemplate.getLoopOptions().getMaxLoopTime().toString());
+                maxLoopTimeField.setInvalid(false);
                 Collections.addAll(registrations,
-                        titleField.addValueChangeListener(this::onTitleChanged)
+                        titleField.addValueChangeListener(this::onTitleChanged),
+                        failBackAsStringBox.addValueChangeListener(this::onFailBackAsStringChanged),
+                        ignoreParsingErrorBox.addValueChangeListener(this::onIgnoreParsingErrorChanged),
+                        maxLoopTimeField.addValueChangeListener(this::onMaxLoopTimeChanged)
                 );
-            }
-            else {
+            } else {
                 titleField.setValue(Optional.ofNullable(requestTemplate.getTitle()).orElse(""));
-                predicateField.setVisible(true);
+                optionsLayout.setVisible(false);
+                requestLayout.setVisible(true);
                 methodComboBox.setVisible(!requestTemplate.getUseLoop());
                 urlField.setVisible(!requestTemplate.getUseLoop());
                 headersField.setVisible(!requestTemplate.getUseLoop());
@@ -140,14 +205,6 @@ public class RequestDetailsLayout extends VerticalLayout {
                         bodyField.addValueChangeListener(this::onBodyChanged)
                 );
             }
-        } else {
-            registrations.forEach(Registration::remove);
-            registrations.clear();
-            titleField.setValue("");
-            predicateField.setValue("");
-            urlField.setValue("");
-            headersField.setValue("");
-            bodyField.setValue("");
         }
     }
 
@@ -172,12 +229,35 @@ public class RequestDetailsLayout extends VerticalLayout {
     private void onHeadersChanged(AbstractField.ComponentValueChangeEvent<TextArea, String> event) {
         try {
             requestTemplate.setHeaders(objectMapper.readValue(event.getValue(), Object.class));
-        } catch (JsonProcessingException e) {}
+        } catch (JsonProcessingException e) {
+        }
     }
 
     private void onBodyChanged(AbstractField.ComponentValueChangeEvent<TextArea, String> event) {
         try {
             requestTemplate.setBody(objectMapper.readValue(event.getValue(), Object.class));
-        } catch (JsonProcessingException e) {}
+        } catch (JsonProcessingException e) {
+        }
+    }
+
+    private void onFailBackAsStringChanged(AbstractField.ComponentValueChangeEvent<Checkbox, Boolean> event) {
+        ((ExtendedBatchTemplate) requestTemplate).getDispatchOptions().setFailBackAsString(event.getValue());
+    }
+
+    private void onIgnoreParsingErrorChanged(AbstractField.ComponentValueChangeEvent<Checkbox, Boolean> event) {
+        ((ExtendedBatchTemplate) requestTemplate).getDispatchOptions().setIgnoreParsingError(event.getValue());
+    }
+
+    private void onMaxLoopTimeChanged(AbstractField.ComponentValueChangeEvent<TextField, String> event) {
+        try {
+            Integer value = Integer.parseInt(event.getValue());
+            if (value >= 1 && value <= 1000) {
+                ((ExtendedBatchTemplate) requestTemplate).getLoopOptions().setMaxLoopTime(value);
+                maxLoopTimeField.setInvalid(false);
+            } else
+                maxLoopTimeField.setInvalid(true);
+        } catch (Exception ex) {
+            maxLoopTimeField.setInvalid(true);
+        }
     }
 }
